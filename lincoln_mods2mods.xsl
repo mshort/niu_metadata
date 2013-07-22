@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink"
-    xmlns:mods="http://www.loc.gov/mods/v3" version="2.0" xmlns:functx="http://www.functx.com">
+    xmlns:mods="http://www.loc.gov/mods/v3" version="3.0" xmlns:functx="http://www.functx.com"
+    exclude-result-prefixes="xs functx">
 
     <xsl:output encoding="UTF-8" indent="yes" method="xml"/>
     <xsl:strip-space elements="*"/>
@@ -59,21 +60,42 @@
     <xsl:template match="mods:mods">
         <mods:mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.4"
             xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
-
             <mods:recordInfo>
                 <mods:recordContentSource authority="oclcorg">JNA</mods:recordContentSource>
-                <mods:recordIdentifier/>
                 <mods:languageOfCataloging>
                     <mods:languageTerm authority="iso639-2b" type="code">eng</mods:languageTerm>
                 </mods:languageOfCataloging>
             </mods:recordInfo>
-
-            <mods:location>
-                <mods:url usage="primary display" access="raw object"/>
-            </mods:location>
-
             <xsl:apply-templates/>
         </mods:mods>
+    </xsl:template>
+
+    <xsl:template match="mods:titleInfo/mods:title">
+        <xsl:choose>
+            <xsl:when test="(starts-with(.,'The '))">
+                <mods:nonSort>The</mods:nonSort>
+                <mods:title>
+                    <xsl:value-of select="substring-after(.,'The ')"/>
+                </mods:title>
+            </xsl:when>
+            <xsl:when test="(starts-with(.,'An'))">
+                <mods:nonSort>An</mods:nonSort>
+                <mods:title>
+                    <xsl:value-of select="substring-after(.,'An ')"/>
+                </mods:title>
+            </xsl:when>
+            <xsl:when test="(starts-with(.,'A'))">
+                <mods:nonSort>A</mods:nonSort>
+                <mods:title>
+                    <xsl:value-of select="substring-after(.,'A ')"/>
+                </mods:title>
+            </xsl:when>
+            <xsl:otherwise>
+                <mods:title>
+                    <xsl:value-of select="."/>
+                </mods:title>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- Strip out "unpublished" -->
@@ -257,9 +279,7 @@
             </xsl:for-each>
 
             <!-- If the publisher contains <u> mark-up, we can assume that it is a bibliographic reference and handle it
-                with pattern matching string manipulations. The substring functions here will require testing. -->
-
-
+                with pattern matching. The substring functions here requires testing. -->
 
             <xsl:for-each select="mods:publisher">
                 <xsl:if test="not(contains(.,'&lt;'))">
@@ -275,7 +295,7 @@
                     </xsl:if>
                 </xsl:if>
 
-                <!-- I match strings with subtitles -->
+                <!-- Matches strings with subtitles -->
 
                 <xsl:if test="matches(.,'&lt;u&gt;[A-Z].*?:.*&lt;/u&gt;')">
                     <mods:place>
@@ -291,7 +311,7 @@
                     </mods:publisher>
                 </xsl:if>
 
-                <!-- I match strings without subtitles -->
+                <!-- Matches strings without subtitles -->
 
                 <xsl:if test="matches(.,'&lt;u&gt;[^:]*&lt;/u&gt;')">
                     <mods:place>
@@ -333,7 +353,7 @@
 
     <xsl:template match="mods:note[.='no theme']"/>
 
-    <!-- How should we handle links? -->
+    <!-- How should we handle links in notes? -->
 
     <xsl:template match="mods:note">
 
@@ -402,16 +422,13 @@
     <xsl:template match="mods:accessCondition">
         <xsl:choose>
             <xsl:when
-                test="(.='Northern Illinois University') or (.='Northern Illinois University.') or (.='Northern Illinois Univeristy') or (.='Northern Illinois Library') or (.='Northern Illinos University') or (.='Northern Illinios University') or (.='Northern Illionis University') or (.='Nothern Illinois University') or (.='Northern University Library') or (.='Northern Illinois Univerity') or (.='Northern Illinois Univesity')">
-                <mods:accessCondition type="useAndReproduction" xlink:href="http://placeholder">For
-                    rights relating to this resource, visit</mods:accessCondition>
-            </xsl:when>
-            <xsl:when
                 test="(.='public domain') or (.='Public Domain') or (.='Public domain') or contains(.,'public domain')">
                 <mods:accessCondition type="useAndReproduction">Use of this public-domain resource
                     is unrestricted.</mods:accessCondition>
             </xsl:when>
-            <xsl:otherwise/>
+            <xsl:otherwise>
+                <mods:note type="ownership"><xsl:value-of select="."/></mods:note>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
@@ -472,7 +489,6 @@
         </xsl:if>
 
         <xsl:if test=".='history'">
-
             <mods:genre authority="local">history</mods:genre>
         </xsl:if>
 
@@ -538,6 +554,7 @@
             <mods:genre authority="aat">pictures (two-dimensional representations)</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -548,6 +565,7 @@
             <mods:genre authority="aat">photographs</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -558,6 +576,7 @@
             <mods:genre authority="aat">sheet music</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -568,6 +587,7 @@
             <mods:genre authority="aat">manuscripts (document genre)</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -578,6 +598,7 @@
             <mods:genre authority="aat">maps</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -588,6 +609,7 @@
             <mods:genre authority="aat">advertisements</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -598,6 +620,7 @@
             <mods:genre authority="aat">political cartoons</mods:genre>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -665,6 +688,7 @@
             <mods:typeOfResource>still image</mods:typeOfResource>
             <mods:physicalDescription>
                 <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+                <mods:internetMediaType>image/jp2</mods:internetMediaType>
                 <mods:internetMediaType>image/tiff</mods:internetMediaType>
                 <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
             </mods:physicalDescription>
@@ -698,7 +722,12 @@
                 </mods:topic>
             </mods:subject>
         </xsl:for-each>
+
         <xsl:if test="mods:temporal='Lincoln'">
+            <mods:location>
+                <mods:url usage="primary display" access="object in context"
+                    >http://lincoln.lib.niu.edu/object/[[pid]]</mods:url>
+            </mods:location>
             <mods:subject>
                 <mods:temporal encoding="w3cdtf" point="start">1818</mods:temporal>
                 <mods:temporal encoding="w3cdtf" point="end">1860</mods:temporal>
@@ -715,6 +744,10 @@
         </xsl:if>
 
         <xsl:if test="mods:temporal='Prairie' or mods:temporal='Prarie'">
+            <mods:location>
+                <mods:url usage="primary display" access="object in context"
+                    >http://prairiefire.lib.niu.edu/object/[[pid]]</mods:url>
+            </mods:location>
             <mods:subject>
                 <mods:temporal encoding="w3cdtf" point="start">1673</mods:temporal>
                 <mods:temporal encoding="w3cdtf" point="end">1818</mods:temporal>
@@ -732,6 +765,10 @@
         </xsl:if>
 
         <xsl:if test="mods:temporal='Civil' or mods:temporal='Cvil'">
+            <mods:location>
+                <mods:url usage="primary display" access="object in context"
+                    >http://civilwar.lib.niu.edu/object/[[pid]]</mods:url>
+            </mods:location>
             <mods:subject>
                 <mods:temporal encoding="w3cdtf" point="start">1861</mods:temporal>
                 <mods:temporal encoding="w3cdtf" point="end">1865</mods:temporal>
@@ -749,6 +786,10 @@
 
         <xsl:if
             test="mods:temporal='GildedAge' or mods:temporal='Gilded' or mods:temporal='Guilded'">
+            <mods:location>
+                <mods:url usage="primary display" access="object in context"
+                    >http://gildedage.lib.niu.edu/object/[[pid]]</mods:url>
+            </mods:location>
             <mods:subject>
                 <mods:temporal encoding="w3cdtf" point="start">1866</mods:temporal>
                 <mods:temporal encoding="w3cdtf" point="end">1896</mods:temporal>
@@ -765,6 +806,10 @@
         </xsl:if>
 
         <xsl:if test="mods:temporal='Twain' or mods:temporal='Twian'">
+            <mods:location>
+                <mods:url usage="primary display" access="object in context"
+                    >http://twain.lib.niu.edu/object/[[pid]]</mods:url>
+            </mods:location>
             <mods:subject>
                 <mods:temporal encoding="w3cdtf" point="start">1835</mods:temporal>
                 <mods:temporal encoding="w3cdtf" point="end">1910</mods:temporal>
@@ -772,7 +817,7 @@
             <mods:relatedItem type="host">
                 <mods:typeOfResource collection="yes"/>
                 <mods:titleInfo>
-                    <mods:title>Mark Twain’s Mississippi</mods:title>
+                    <mods:title>Mark Twain's Mississippi</mods:title>
                 </mods:titleInfo>
                 <mods:location>
                     <mods:url>http://twain.lib.niu.edu/</mods:url>
@@ -898,6 +943,5 @@
             </mods:subject>
         </xsl:if>
     </xsl:template>
-
 
 </xsl:stylesheet>
