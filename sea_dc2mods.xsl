@@ -1,69 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sru_dc="info:srw/schema/1/dc-schema"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.loc.gov/mods/v3"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="sru_dc oai_dc dc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" exclude-result-prefixes="oai_dc dc"
     version="2.0">
     <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
-    <xsl:include href="inc/dcmiType.xsl"/>
-    <xsl:include href="inc/mimeType.xsl"/>
-    <xsl:include href="inc/csdgm.xsl"/>
-    <xsl:include href="inc/forms.xsl"/>
-    <xsl:include href="inc/iso3166-1.xsl"/>
-    <xsl:include href="inc/iso639-2.xsl"/>
-    <!-- Do you have a Handle server?  If so, specify the base URI below including the trailing slash a la: http://hdl.loc.gov/ -->
-    <xsl:variable name="handleServer">
-        <xsl:text>http://hdl.loc.gov/</xsl:text>
-    </xsl:variable>
+
     <xsl:variable name="apos">'</xsl:variable>
     <xsl:template match="*[not(node())]"/>
     <!-- strip empty DC elements that are output by tools like ContentDM -->
     <xsl:template match="/">
-        <xsl:if test="sru_dc:dcCollection">
-            <xsl:apply-templates select="sru_dc:dcCollection"/>
-        </xsl:if>
-        <xsl:if test="sru_dc:dc">
-            <xsl:apply-templates select="sru_dc:dc"/>
-        </xsl:if>
         <xsl:if test="oai_dc:dc">
             <xsl:apply-templates/>
         </xsl:if>
     </xsl:template>
-    <xsl:template match="sru_dc:dcCollection">
-        <modsCollection xmlns="http://www.loc.gov/mods/v3"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd">
-            <xsl:apply-templates select="sru_dc:dc">
-                <xsl:with-param name="dcCollection">
-                    <xsl:text>true</xsl:text>
-                </xsl:with-param>
-            </xsl:apply-templates>
-        </modsCollection>
-    </xsl:template>
-    <xsl:template match="sru_dc:dc">
-        <xsl:param name="dcCollection"/>
-        <xsl:choose>
-            <xsl:when test="$dcCollection = 'true'">
-                <mods version="3.2">
-                    <xsl:call-template name="dcMain"/>
-                </mods>
-            </xsl:when>
-            <xsl:otherwise>
-                <mods version="3.2" xmlns="http://www.loc.gov/mods/v3"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd">
-                    <xsl:call-template name="dcMain"/>
-                </mods>
-            </xsl:otherwise>
-        </xsl:choose>
-
-    </xsl:template>
     <xsl:template match="oai_dc:dc">
-        <mods version="3.2" xmlns="http://www.loc.gov/mods/v3"
+        <mods version="3.4" xmlns="http://www.loc.gov/mods/v3"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd">
+            xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
             <xsl:call-template name="dcMain"/>
         </mods>
     </xsl:template>
@@ -95,13 +50,7 @@
         <xsl:for-each select="dc:description">
             <xsl:apply-templates select="."/>
         </xsl:for-each>
-        <xsl:for-each select="dc:publisher">
-            <xsl:apply-templates select="."/>
-        </xsl:for-each>
         <xsl:for-each select="dc:date">
-            <xsl:apply-templates select="."/>
-        </xsl:for-each>
-        <xsl:for-each select="dc:format">
             <xsl:apply-templates select="."/>
         </xsl:for-each>
         <xsl:for-each select="dc:identifier">
@@ -130,14 +79,47 @@
         </xsl:for-each>
     </xsl:template>
     <xsl:template match="dc:title">
-        <titleInfo>
-            <title>
-                <xsl:apply-templates/>
-            </title>
-        </titleInfo>
+        <xsl:choose>
+            <xsl:when test="(starts-with(.,'The '))">
+                <titleInfo>
+                    <nonSort>The</nonSort>
+                    <title>
+                        <xsl:value-of select="substring-after(.,'The ')"/>
+                    </title>
+                </titleInfo>
+            </xsl:when>
+            <xsl:when test="(starts-with(.,'An '))">
+                <titleInfo>
+                    <nonSort>An</nonSort>
+                    <title>
+                        <xsl:value-of select="substring-after(.,'An ')"/>
+                    </title>
+                </titleInfo>
+            </xsl:when>
+            <xsl:when test="(starts-with(.,'A '))">
+                <titleInfo>
+                    <nonSort>A</nonSort>
+                    <title>
+                        <xsl:value-of select="substring-after(.,'A ')"/>
+                    </title>
+                </titleInfo>
+            </xsl:when>
+            <xsl:otherwise>
+                <titleInfo>
+                    <title>
+                        <xsl:value-of select="."/>
+                    </title>
+                </titleInfo>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
     <xsl:template match="dc:creator">
         <xsl:choose>
+            <xsl:when
+                test="(string(text()) = 'Anonymous') or (string(text()) = 'unknown') or (string(text()) = 'Unknown')">
+                <xsl:apply-templates
+                    select="*[(. != 'Anonymous') or (. != 'unknown') or (. != 'Unknown')]"/>
+            </xsl:when>
             <xsl:when test="string(text()) = 'Ebihara, May Mayko'">
                 <name type="personal" authority="naf">
                     <namePart>
@@ -198,7 +180,7 @@
             <xsl:when test="string(text()) = 'Cuenco, Jose Ma.'">
                 <name type="personal" authority="local">
                     <namePart>
-                        <xsl:text>Cuenco, José Maria</xsl:text>
+                        <xsl:text>Cuenco, José Maria</xsl:text>
                     </namePart>
                     <role>
                         <roleTerm type="text">
@@ -210,7 +192,7 @@
             <xsl:when test="string(text()) = 'Vietnam Fine Arts Association of HoChiMinhCity'">
                 <name type="corporate" authority="naf" lang="vie">
                     <namePart>
-                        <xsl:text>Hôi mỹ thuât Viêt Nam</xsl:text>
+                        <xsl:text>Hôi mỹ thuât Viêt Nam</xsl:text>
                     </namePart>
                     <role>
                         <roleTerm type="text">
@@ -292,10 +274,10 @@
             <xsl:when test="string(text()) = 'Jayavarman VII'">
                 <subject authority="lcsh">
                     <name type="personal" authority="naf">
-                        <namePart>Jăyvarmăn</namePart>
-                        <namePart type="termOfAddress">VII</namePart>
-                        <namePart type="termOfAddress">King of Cambodia</namePart>
-                        <namePart type="date">ca. 1120-ca. 1215</namePart>
+                        <namePart>Jăyvarmăn</namePart>
+                        <namePart type="termsOfAddress">VII</namePart>
+                        <namePart type="termsOfAddress">King of Cambodia</namePart>
+                        <namePart type="date">approximately 1120-approximately 1215</namePart>
                     </name>
                 </subject>
             </xsl:when>
@@ -306,6 +288,13 @@
                     </topic>
                 </subject>
             </xsl:when>
+            <xsl:otherwise>
+                <subject authority="local">
+                    <topic>
+                        <xsl:value-of select="."/>
+                    </topic>
+                </subject>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
     <xsl:template match="dc:description">
@@ -315,32 +304,110 @@
         <xsl:choose>
             <xsl:when
                 test="string(text()) = 'This item digitized and made available online with funds provided by United States Department of Education, TICFIA (Technological Innovation and Cooperation for Foreign Information) Grant P337A05006.'">
-                <note tpye="funding">
+                <note type="funding">
                     <xsl:apply-templates/>
                 </note>
             </xsl:when>
             <xsl:when
-                test="string(text()) = 'This item digitized and made available online with funds provided by United States Department of Education, TICFIA (Technological Innovation and Cooperation for Foreign Information) Grant P337A090018..'">
-                <note tpye="funding">
+                test="string(text()) = 'This item digitized and made available online with funds provided by United States Department of Education, TICFIA (Technological Innovation and Cooperation for Foreign Information) Grant P337A090018.'">
+                <note type="funding">
                     <xsl:apply-templates/>
                 </note>
             </xsl:when>
-            <xsl:when test="string(text()) = 'Location : Siem Reap.'"> </xsl:when>
-            <xsl:when test="string(text()) = 'Location : Phnom Penh.'"/>
-            <xsl:when test="string(text()) = 'Location : Kampong Speu Province.'"/>
-            <xsl:when test="string(text()) = 'Svay, Kandal Province, Cambodia.'"/>
-            <xsl:when test="string(text()) = 'Kandal Province, Cambodia'"/>
+            <xsl:when test="string(text()) = 'Location : Siem Reap.'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Siem Reap (Cambodia)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Location : Phnom Penh.'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Phnom Penh (Cambodia)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Location : Kampong Speu Province.'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Kâmpóng Spœ (Cambodia : Province)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Svay, Kandal Province, Cambodia.'">
+                <!--Control this? -->
+                <subject authority="local">
+                    <geographic>
+                        <xsl:apply-templates/>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Kandal Province, Cambodia'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Kândal (Cambodia : Province)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
             <xsl:when
-                test="string(text()) = 'The Thirty-Seven Nats. A Phase of Spirit-Worship prevailing in Burma, By Sir R. C. Temple, Bart., C.I.E.   With full-page and other illustrations.'"/>
+                test="string(text()) = 'The Thirty-Seven Nats. A Phase of Spirit-Worship prevailing in Burma, By Sir R. C. Temple, Bart., C.I.E.   With full-page and other illustrations.'">
+                <note type="source">
+                    <xsl:apply-templates/>
+                </note>
+            </xsl:when>
             <xsl:when
-                test="string(text()) = 'London. W. Griggs, Chromo-Lithographer to the King. 1906'"/>
-            <xsl:when test="string(text()) = 'Location : Kandal Province.'"/>
-            <xsl:when test="string(text()) = 'Mounted on photographic mounting card, 285 X 222 cm.'"/>
-            <xsl:when test="string(text()) = 'Phnom Penh'"/>
-            <xsl:when test="string(text()) = 'That Luang, Vientiane, Laos'"/>
-            <xsl:when test="string(text()) = 'Svay, Kandal Province'"/>
-            <xsl:when test="string(text()) = 'Location : Udong.'"/>
-            <xsl:when test="string(text()) = 'Ho Phakeo, Vientiane, Laos'"/>
+                test="string(text()) = 'London. W. Griggs, Chromo-Lithographer to the King. 1906'">
+                <note type="source">
+                    <xsl:apply-templates/>
+                </note>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Location : Kandal Province.'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Kândal (Cambodia : Province)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Phnom Penh'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Phnom Penh (Cambodia)</xsl:text>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'That Luang, Vientiane, Laos'">
+                <subject authority="lcsh">
+                    <geographic>
+                        <xsl:text>Vat Phathāt Lūang Vīangčhan (Laos)</xsl:text>
+                    </geographic>
+                </subject>
+                <subject authority="lcsh">
+                    <topic>Stūpas</topic>
+                    <geographic>Laos</geographic>
+                    <geographic>Viangchan</geographic>
+                </subject>
+                <subject authority="lcsh">
+                    <topic>Buddhist temples</topic>
+                    <geographic>Laos</geographic>
+                    <geographic>Viangchan</geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Svay, Kandal Province'">
+                <!--Control this? -->
+                <subject authority="local">
+                    <geographic>
+                        <xsl:apply-templates/>
+                    </geographic>
+                </subject>
+            </xsl:when>
+            <xsl:when test="string(text()) = 'Location : Udong.'">
+                <!--Control this? -->
+                <subject authority="local">
+                    <geographic>Udong</geographic>
+                </subject>
+            </xsl:when>
+            <!--         <xsl:when test="string(text()) = 'Ho Phakeo, Vientiane, Laos'"/>
             <xsl:when test="string(text()) = 'Japan'"/>
             <xsl:when test="string(text()) = 'Patou Xai, Vientiane, Laos'"/>
             <xsl:when test="string(text()) = 'Vat That Foun, Vientiane, Laos'"/>
@@ -387,7 +454,7 @@
             <xsl:when test="string(text()) = 'Wat Svay, Kandal Province, Cambodia'"/>
             <xsl:when test="string(text()) = 'Fountain Plaza, Vientiane, Laos'"/>
             <xsl:when test="string(text()) = 'That Dam, Vientiane, Laos'"/>
-            <xsl:when test="string(text()) = 'Wat Prerung'"/>
+            <xsl:when test="string(text()) = 'Wat Prerung'"/> -->
             <xsl:when test="matches(.,'^(Source : )')">
                 <note type="source">
                     <xsl:value-of select="substring-after(.,'Source : ')"/>
@@ -403,183 +470,108 @@
             <xsl:apply-templates/>
         </tableOfContents>-->
     </xsl:template>
-    <xsl:template match="dc:publisher">
-        
-        <!-- Still have to do place of publication vs. publisher processing -->
-        <!-- Less than 50...might be worth fixing all of these? -->
+
+    <xsl:template match="dc:contributor">
         <xsl:choose>
-            <xsl:when
-                test="string(text()) = 'Northern Illinois University Libraries - Southeast Asia Digital Library (http://sea.lib.niu.edu)' or 'Southeast Asia Digital Library, Northern Illinois University' or 'Northern Illinois University Libraries - Southeast Asia Digital Library'">
-                <originInfo>
-                    <publisher>
-                        <xsl:text>Northern Illinois University</xsl:text>
-                    </publisher>
-                </originInfo>
+            <xsl:when test=".='Art in the Age of Doi Moi (Renovation) in Vietnam'">
                 <relatedItem type="host">
-                    <typeOfResource collection="yes"/>
                     <titleInfo>
-                        <title>Southeast Asia Digital Library</title>
+                        <title>Art in the age of Doi Moi</title>
                     </titleInfo>
-                    <location>
-                        <url>http://sea.lib.niu.edu</url>
-                    </location>
+                    <identifier>SEAImages:VNArtBooks</identifier>
+                    <identifier>SEAImages:VNArtImages</identifier>
                 </relatedItem>
             </xsl:when>
-
+            <xsl:when test=".='On the Record: Indonesian Literary Figures'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>On the record</title>
+                        <subTitle>Indonesian Literary Figures </subTitle>
+                    </titleInfo>
+                    <identifier>SEAImages:LontarVideos</identifier>
+                </relatedItem>
+            </xsl:when>
             <xsl:otherwise>
-                <originInfo>
-                    <publisher>
+                <name>
+                    <namePart>
                         <xsl:apply-templates/>
-                    </publisher>
-                </originInfo>
+                    </namePart>
+                    <role>
+                        <roleTerm type="text">
+                            <xsl:text>contributor</xsl:text>
+                        </roleTerm>
+                    </role>
+                </name>
             </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-    <xsl:template match="dc:contributor"> <!-- Less than 20...consider fixing -->
-        <name>
-            <namePart>
-                <xsl:apply-templates/>
-            </namePart>
-            <!-- <role>
-                <roleTerm type="text">
-                    <xsl:text>contributor</xsl:text>
-                </roleTerm>
-            </role> -->
-        </name>
-    </xsl:template>
-
-    <!--                   DATE                           -->
-
-    <xsl:template match="dc:date[.='unknown']"/>
-
-    <xsl:template name="format_date">
-        <xsl:param name="old_date"/>
-        <xsl:variable name="mo">
-            <xsl:value-of select="substring-before(substring-after($old_date,' '),' 1')"/>
-        </xsl:variable>
-        <xsl:variable name="day">
-            <xsl:value-of select="substring-before($old_date,$mo)"/>
-        </xsl:variable>
-        <xsl:variable name="year">
-            <xsl:value-of select="substring-after($old_date,$mo)"/>
-        </xsl:variable>
-        <xsl:value-of select="normalize-space($year)"/>
-        <xsl:value-of select="'-'"/>
-        <xsl:choose>
-            <xsl:when test="$mo = 'January'">01</xsl:when>
-            <xsl:when test="$mo = 'February'">02</xsl:when>
-            <xsl:when test="$mo = 'March'">03</xsl:when>
-            <xsl:when test="$mo = 'April'">04</xsl:when>
-            <xsl:when test="$mo = 'May'">05</xsl:when>
-            <xsl:when test="$mo = 'June'">06</xsl:when>
-            <xsl:when test="$mo = 'July'">07</xsl:when>
-            <xsl:when test="$mo = 'August'">08</xsl:when>
-            <xsl:when test="$mo = 'September'">09</xsl:when>
-            <xsl:when test="$mo = 'October'">10</xsl:when>
-            <xsl:when test="$mo = 'November'">11</xsl:when>
-            <xsl:when test="$mo = 'December'">12</xsl:when>
-        </xsl:choose>
-        <xsl:value-of select="'-'"/>
-        <xsl:value-of select="normalize-space($day)"/>
-    </xsl:template>
-
-    <!-- January 1930 -->
-    <xsl:template name="format_date_simple">
-        <xsl:param name="old_date"/>
-        <xsl:variable name="mo">
-            <xsl:value-of select="substring-before($old_date,' 1')"/>
-        </xsl:variable>
-        <xsl:variable name="year">
-            <xsl:value-of select="substring-after($old_date,' ')"/>
-        </xsl:variable>
-        <xsl:value-of select="normalize-space($year)"/>
-        <xsl:value-of select="'-'"/>
-        <xsl:choose>
-            <xsl:when test="$mo = 'January'">01</xsl:when>
-            <xsl:when test="$mo = 'February'">02</xsl:when>
-            <xsl:when test="$mo = 'March'">03</xsl:when>
-            <xsl:when test="$mo = 'April'">04</xsl:when>
-            <xsl:when test="$mo = 'May'">05</xsl:when>
-            <xsl:when test="$mo = 'June'">06</xsl:when>
-            <xsl:when test="$mo = 'July'">07</xsl:when>
-            <xsl:when test="$mo = 'August'">08</xsl:when>
-            <xsl:when test="$mo = 'September'">09</xsl:when>
-            <xsl:when test="$mo = 'October'">10</xsl:when>
-            <xsl:when test="$mo = 'November'">11</xsl:when>
-            <xsl:when test="$mo = 'December'">12</xsl:when>
         </xsl:choose>
     </xsl:template>
 
     <xsl:template match="dc:date">
         <originInfo>
             <xsl:choose>
-
-                <!-- 01/10/1930 -->
-                <xsl:when test="matches(.,'(\d{2})/(\d{2})/(\d{4})')">
-                    <dateOther encoding="w3cdtf" keyDate="yes">
-                        <xsl:value-of
-                            select="concat(
-                            substring(., 7, 4),
-                            '-',
-                            substring(., 1, 2),
-                            '-',
-                            substring(., 4, 2)
-                            )"
-                        />
-                    </dateOther>
-                </xsl:when>
-
-                <!-- 10 January 1930 -->
                 <xsl:when
-                    test="matches(., '(\d{2})\W(January|February|March|April|May|June|July|August|September|October|November|December)\W(\d{4})')">
-                    <dateOther encoding="w3cdtf" keyDate="yes">
-                        <xsl:call-template name="format_date">
-                            <xsl:with-param name="old_date" select="."/>
-                        </xsl:call-template>
-                    </dateOther>
+                    test="(/oai_dc:dc/dc:publisher='Northern Illinois University Libraries - Southeast Asia Digital Library (http://sea.lib.niu.edu)') or (.!='Southeast Asia Digital Library, Northern Illinois University') or (.!='Northern Illinois University Libraries - Southeast Asia Digital Library')">
+                    <publisher>Southeast Asia Digital Library</publisher>
+                </xsl:when>
+                <xsl:otherwise>
+                    <publisher>
+                        <xsl:value-of select="/oai_dc:dc/dc:publisher"/>
+                    </publisher>
+                </xsl:otherwise>
+            </xsl:choose>
+
+
+            <xsl:choose>
+                <xsl:when test="(.='unknown') or (.='Date unknown') or (.='9999')">
+                    <dateOther encoding="iso8601" keyDate="yes" qualifier="questionable"
+                        >19</dateOther>
                 </xsl:when>
 
                 <!-- 1930-1935 -->
-                <xsl:when test="matches(.,'(\d{4})-(\d{4})')">
-                    <dateOther encoding="w3cdtf" keyDate="yes" point="start">
+                <!-- ca. 1930-1935 -->
+                <!-- 1930 - 1935 -->
+                <xsl:when test="matches(.,'^(ca.\W)*?(\d{4})(\W)*?-(\W)*?(\d{4})')">
+                    <dateOther encoding="w3cdtf" keyDate="yes" point="start" qualifier="approximate">
                         <xsl:value-of select="substring-before(.,'-')"/>
                     </dateOther>
-                    <dateOther encoding="w3cdtf" keyDate="yes" point="end">
+                    <dateOther encoding="w3cdtf" keyDate="yes" point="end" qualifier="approximate">
                         <xsl:value-of select="substring-after(.,'-')"/>
                     </dateOther>
                 </xsl:when>
 
-                <!-- 19300110 -->
-                <xsl:when test="matches(.,'(\d{8})')">
-                    <dateOther encoding="w3cdtf" keyDate="yes">
-                        <xsl:value-of
-                            select="concat(
-                            substring(., 1, 4),
-                            '-',
-                            substring(., 5, 2),
-                            '-',
-                            substring(., 7, 2)
-                            )"
-                        />
-                    </dateOther>
-                </xsl:when>
-
-                <!-- January 1930 -->
-                <xsl:when
-                    test="matches(.,'(January|February|March|April|May|June|July|August|September|October|November|December)\W(12|13|14|15|16|17|18|19|20)\d\d')">
-                    <dateOther encoding="w3cdtf" keyDate="yes">
-                        <xsl:call-template name="format_date_simple">
-                            <xsl:with-param name="old_date" select="."/>
-                        </xsl:call-template>
-                    </dateOther>
-                </xsl:when>
-
-                <xsl:otherwise>
+                <!-- 1994-12-05 -->
+                <xsl:when test="matches(.,'^(\d{4})\-(\d{2})\-(\d{2})')">
                     <dateOther encoding="w3cdtf" keyDate="yes">
                         <xsl:value-of select="."/>
                     </dateOther>
-                </xsl:otherwise>
+                </xsl:when>
 
+                <!-- 1994 -->
+                <xsl:when test="matches(.,'^([0-9]{4}){1}$')">
+                    <dateOther encoding="w3cdtf" keyDate="yes">
+                        <xsl:value-of select="."/>
+                    </dateOther>
+                </xsl:when>
+
+                <!-- 12/05/1994 -->
+                <xsl:when test="matches(.,'^([0-9]+)/([0-9]+)/([0-9]+)$')">
+                    <xsl:analyze-string select="." regex="([0-9]+)/([0-9]+)/([0-9]+)$">
+                        <xsl:matching-substring>
+                            <dateOther encoding="w3cdtf" keyDate="yes">
+                                <xsl:value-of select="regex-group(3)"/>
+                                <xsl:text>-</xsl:text>
+                                <xsl:value-of select="regex-group(1)"/>
+                                <xsl:text>-</xsl:text>
+                                <xsl:value-of select="regex-group(2)"/>
+                            </dateOther>
+                        </xsl:matching-substring>
+                    </xsl:analyze-string>
+                </xsl:when>
+                <xsl:otherwise>
+                    <dateOther>
+                        <xsl:value-of select="."/>
+                    </dateOther>
+                </xsl:otherwise>
             </xsl:choose>
 
         </originInfo>
@@ -601,16 +593,11 @@
                 <physicalDescription>
                     <form authority="smd">photoprint</form>
                     <form authority="marcform">electronic</form>
-                    <extent>1 photograph</extent>
-                    <xsl:if test="/oai_dc:dc/dc:format!='Photograph'">
-                        <xsl:for-each select="/oai_dc:dc/dc:format">
-                            <extent>
-                                <xsl:value-of select="/oai_dc:dc/dc:format"/>
-                            </extent>
-                        </xsl:for-each>
-                    </xsl:if>
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
@@ -623,8 +610,11 @@
                 </genre>
                 <physicalDescription>
                     <form authority="marcform">electronic</form>
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
@@ -636,13 +626,16 @@
                     <xsl:text>manuscripts (document genre)</xsl:text>
                 </genre>
                 <physicalDescription>
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <form authority="marcform">electronic</form>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
             <xsl:when test="string(text()) = 'Book'">
-                <!-- is a book a collection? -->
                 <typeOfResource>
                     <xsl:text>text</xsl:text>
                 </typeOfResource>
@@ -650,12 +643,12 @@
                     <xsl:text>books</xsl:text>
                 </genre>
                 <physicalDescription>
-                    <extent>
-                        <xsl:value-of select="dc:format"/>
-                    </extent>
-                    <!-- revisit...need to get rid of $b, like "ill." -->
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <form authority="marcform">electronic</form>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
@@ -664,8 +657,7 @@
                     <xsl:text>text</xsl:text>
                 </typeOfResource>
                 <physicalDescription>
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <form authority="marcform">electronic</form>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
@@ -677,42 +669,60 @@
                     <xsl:text>articles</xsl:text>
                 </genre>
                 <physicalDescription>
+                    <form authority="marcform">electronic</form>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <internetMediaType>application/pdf</internetMediaType>
-                    <digitalOrigin>reformatted digital</digitalOrigin>
+                    <digitalOrigin>born digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
 
             <xsl:when test="string(text()) = 'ArchivalMaterial'">
-                <typeOfResource collection="yes">
+                <typeOfResource>
                     <xsl:text>mixed material</xsl:text>
                 </typeOfResource>
+                <genre authority="aat">
+                    <xsl:text>documents</xsl:text>
+                </genre>
                 <physicalDescription>
-                    <internetMediaType>image/jpeg</internetMediaType>
-                    <internetMediaType>image/tiff</internetMediaType>
+                    <form authority="marcform">electronic</form>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
                     <digitalOrigin>reformatted digital</digitalOrigin>
                 </physicalDescription>
             </xsl:when>
+            <xsl:when test="string(text())= 'Video'">
+                <genre authority="aat">
+                    <xsl:text>video recordings</xsl:text>
+                </genre>
+                <typeOfResource>
+                    <xsl:text>moving image</xsl:text>
+                </typeOfResource>
+                <physicalDescription>
+                    <form authority="marcform">electronic</form>
+                    <xsl:for-each select="/oai_dc:dc/dc:format">
+                        <extent>
+                            <xsl:value-of select="/oai_dc:dc/dc:format"/>
+                        </extent>
+                    </xsl:for-each>
+                </physicalDescription>
+            </xsl:when>
             <xsl:otherwise>
-                <xsl:if test="not(string($types) = text())">
-                    <xsl:variable name="lowercaseType"
-                        select="translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>
-                    <!--<typeOfResource>
-                        	<xsl:text>mixed material</xsl:text>
-                	</typeOfResource>-->
+
+                  <typeOfResource>
+                    		<xsl:text>mixed material</xsl:text>
+                	</typeOfResource>
                     <genre>
-                        <xsl:value-of select="$lowercaseType"/>
+                        <xsl:value-of select="."/>
                     </genre>
-                </xsl:if>
             </xsl:otherwise>
         </xsl:choose>
-    </xsl:template>
-
-    <xsl:template match="dc:format">
-        <physicalDescription>
-            <extent>
-                <xsl:apply-templates/>
-            </extent>
-        </physicalDescription>
     </xsl:template>
 
     <xsl:template match="dc:identifier">
@@ -722,11 +732,6 @@
         <identifier>
             <xsl:attribute name="type">
                 <xsl:choose>
-                    <!-- handled by location/url -->
-                    <xsl:when
-                        test="starts-with(text(), 'http://') and (not(contains(text(), $handleServer) or not(contains(substring-after(text(), 'http://'), 'hdl'))))">
-                        <xsl:text>uri</xsl:text>
-                    </xsl:when>
                     <xsl:when
                         test="starts-with(text(),'urn:hdl') or starts-with(text(),'hdl') or starts-with(text(),'http://hdl.')">
                         <xsl:text>hdl</xsl:text>
@@ -749,10 +754,6 @@
                         <xsl:text>isbn</xsl:text>
                     </xsl:when>
                     <xsl:when
-                        test="(starts-with(text(), 'ISRC') or starts-with(text(), 'isrc')) or ((string-length(text()) = 12) and (contains($iso3166-1, $iso-3166Check))) or ((string-length(text()) = 15) and (contains(text(), '-') or contains(text(), '/')) and contains($iso3166-1, $iso-3166Check))">
-                        <xsl:text>isrc</xsl:text>
-                    </xsl:when>
-                    <xsl:when
                         test="(starts-with(text(), 'ISMN') or starts-with(text(), 'ismn')) or starts-with(text(), 'M') and ((string-length(text()) = 11) and contains(text(), '-') or string-length(text()) = 9)">
                         <xsl:text>ismn</xsl:text>
                     </xsl:when>
@@ -762,10 +763,6 @@
                     </xsl:when>
                     <xsl:when test="starts-with(text(), 'ISTC') or starts-with(text(), 'istc')">
                         <xsl:text>istc</xsl:text>
-                    </xsl:when>
-                    <xsl:when
-                        test="(starts-with(text(), 'UPC') or starts-with(text(), 'upc')) or (string-length(text()) = 12 and not(contains(text(), ' ')) and not(contains($iso3166-1, $iso-3166Check)))">
-                        <xsl:text>upc</xsl:text>
                     </xsl:when>
                     <xsl:when
                         test="(starts-with(text(), 'SICI') or starts-with(text(), 'sici')) or ((starts-with(text(), '0') or starts-with(text(), '1')) and (contains(text(), ';') and contains(text(), '(') and contains(text(), ')') and contains(text(), '&lt;') and contains(text(), '&gt;')))">
@@ -780,21 +777,185 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:attribute>
-            <xsl:choose>
-                <xsl:when
-                    test="starts-with(text(),'urn:hdl') or starts-with(text(),'hdl') or starts-with(text(),$handleServer)">
-                    <xsl:value-of select="concat('hdl:',substring-after(text(),$handleServer))"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:apply-templates/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:apply-templates/>
         </identifier>
+        <location>
+            <url usage="primary display" access="object in context">
+                <xsl:text>http://sea.lib.niu.edu/islandora/object/</xsl:text>
+                <xsl:value-of select="."/>
+            </url>
+        </location>
     </xsl:template>
     <xsl:template match="dc:source">
+        <xsl:param name="palm">
+            <xsl:text>Pa'O Religous and Literary Manuscripts</xsl:text>
+        </xsl:param>
         <xsl:choose>
-            <xsl:when test="matches(.,'^(Call Number: )')">
-                <!-- Finish meeeee! -->
+            <!-- Projects -->
+            <xsl:when test=".='Palm-Leaf Manuscripts of Thailand'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Palm-leaf manuscripts of Thailand</title>
+                    </titleInfo>
+                    <identifier>SEAImages:KKManuscripts</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".=$palm">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Pa'o religous and literary manuscripts</title>
+                    </titleInfo>
+                    <identifier>SEAImages:PAOManuscripts</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Jawi Transliteration Project'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Jawi Transliteration Project</title>
+                    </titleInfo>
+                    <identifier>SEAImages:Jawi</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='The Living Memory Project'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <nonSort>The</nonSort>
+                        <title>living memory project</title>
+                    </titleInfo>
+                    <identifier>SEAImages:LMPImages</identifier>
+                    <!-- Images -->
+                    <identifier>SEAImages:LMPVideos</identifier>
+                    <!-- Video -->
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Early Imprints from Southeast Asia'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Early imprints from Southeast Asia</title>
+                    </titleInfo>
+                    <identifier>SEAImages:BLBooks</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when
+                test=".='The May Ebihara Collection: Ethnographic Research in Rural Community, 1950-1995.'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <nonSort>The</nonSort>
+                        <title>May Ebihara collection</title>
+                        <subTitle>ethnographic research in rural community, 1959-1995</subTitle>
+                    </titleInfo>
+                    <identifier>SEAImages:MECImages</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='The Diaries and Travel Writings of King Chulalongkorn of Siam'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <nonSort>The</nonSort>
+                        <title>diaries and travel writings of King Chulalongkorn of Siam</title>
+                    </titleInfo>
+                    <identifier>SEAImages:OUBooks</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Then and Now: Historical Photographs of Cambodia'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Then and now</title>
+                        <subTitle>historical photographs of Cambodia</subTitle>
+                    </titleInfo>
+                    <identifier>SEAImages:CPImages</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Historical Archives and Photographs: University of San Carlos'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Historical archives and photographs</title>
+                        <subTitle>Cebuano Studies Center, Philippines</subTitle>
+                    </titleInfo>
+                    <identifier>SEAImages:USCBooks</identifier>
+                    <!-- Books -->
+                    <identifier>SEAImages:USCImages</identifier>
+                    <!-- Images -->
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Virtual Southeast Asia'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Virtual Southeast Asia</title>
+                    </titleInfo>
+                    <identifier>SEAImages:VSAImages</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Living Memory of the Khmer'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Living Memory of the Khmer</title>
+                    </titleInfo>
+                    <identifier>SEAImages:LKVideos</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Lontar Digital Library'">
+                <xsl:apply-templates select="*[. != 'Lontar Digital Library']"/>
+            </xsl:when>
+            <xsl:when test=".='Mandalay Marionettes Theater Puppet Show'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Mandalay marionettes theater puppet show</title>
+                    </titleInfo>
+                    <identifier>SEAImages:NIUVideos</identifier>
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Collection of Natalia Kraevskaia'">
+                <note>
+                    <xsl:apply-templates/>
+                </note>
+            </xsl:when>
+            <xsl:when test="(.='Northern Illinois Library') or (.='Northern Illinois University')">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Burmese manuscripts from the Donn V. Hart Collection</title>
+                    </titleInfo>
+                    <identifier>SEAImages:NIUBooks</identifier>
+                    <!-- Books -->
+                    <identifier>SEAImages:NIUManuscripts</identifier>
+                    <!-- Manuscripts -->
+                </relatedItem>
+            </xsl:when>
+            <xsl:when test=".='Video Archive -- Television Program, Indonesia'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>Video archive</title>
+                        <subTitle>television program, Indonesia</subTitle>
+                    </titleInfo>
+                </relatedItem>
+            </xsl:when>
+
+            <!-- Other source -->
+            <xsl:when test="matches(.,'(Call Number: )')">
+                <classification authority="lcc">
+                    <xsl:value-of select="substring-after(.,'Number: ')"/>
+                </classification>
+            </xsl:when>
+            <xsl:when test=".='Gift of Bui Xuan Phai'">
+                <note>
+                    <xsl:apply-templates/>
+                </note>
+            </xsl:when>
+            <xsl:when test=".='Public domain'">
+                <accessCondition>Public domain</accessCondition>
+            </xsl:when>
+            <xsl:when
+                test=".='Temple, Richard Carnac, Sir.  The Thirty-Seven Nats. A Phase of Spirit Worship Prevailing in Burma.  London: W. Griggs, 1906.'">
+                <note type="source">
+                    <xsl:value-of select="."/>
+                </note>
+            </xsl:when>
+            <xsl:when test=".='SEAnet Books'">
+                <relatedItem type="host">
+                    <titleInfo>
+                        <title>SEAnet Books</title>
+                    </titleInfo>
+                    <identifier>SEAImages:SEAnetBooks</identifier>
+                </relatedItem>
             </xsl:when>
             <xsl:otherwise>
                 <note>
@@ -804,52 +965,53 @@
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="dc:language[.='Jawi']"/>
     <xsl:template match="dc:language">
-        <xsl:if test="string(text()) = 'Burmese'">
+        <xsl:if test=".='Burmese'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Burmese</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">bur</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'PaO' or string(text()) = concat('Pa',$apos,'O')">
+        <xsl:if test="(.='PaO') or (.=concat('Pa',$apos,'O'))">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Taungthu</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">kar</languageTerm>
-                <languageTerm type="text" authority="local">Pa'O</languageTerm>
+                <languageTerm type="text" authority="iso639-3">Pa'o Karen</languageTerm>
+                <languageTerm type="code" authority="iso639-2b">blk</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'English'">
+        <xsl:if test=". = 'English'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">English</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">eng</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Malay'">
+
+        <xsl:if test=".='Malay'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Malay</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">mal</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Thai'">
+        <xsl:if test=". = 'Thai'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Thai</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">tha</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Vietnamese'">
+        <xsl:if test=". = 'Vietnamese'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Vietnamese</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">vie</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Thai-Isan' or string(text()) = 'Thi-Isan'">
+        <xsl:if test="(. = 'Thai-Isan') or (. = 'Thi-Isan')">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Northeastern Thai</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">tai</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Pali-Thai-Isan'">
+        <xsl:if test=". = 'Pali-Thai-Isan'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Pali</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">pli</languageTerm>
@@ -859,37 +1021,63 @@
                 <languageTerm type="code" authority="iso639-2b">tai</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Pali'">
+        <xsl:if test=". = 'Pali'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Pali</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">pli</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'French'">
+        <xsl:if test=". = 'French'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">French</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">fre</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Printed in Lao Tham (Northern Thai) script'">
+        <xsl:if test=". = 'Russian'">
+            <language>
+                <languageTerm type="text" authority="iso639-2b">Russian</languageTerm>
+                <languageTerm type="code" authority="iso639-2b">rus</languageTerm>
+            </language>
+        </xsl:if>
+        <xsl:if test=". = 'Spanish'">
+            <language>
+                <languageTerm type="text" authority="iso639-2b">Spanish</languageTerm>
+                <languageTerm type="code" authority="iso639-2b">spa</languageTerm>
+            </language>
+        </xsl:if>
+        <xsl:if test=". = 'Portuguese'">
+            <language>
+                <languageTerm type="text" authority="iso639-2b">Portuguese</languageTerm>
+                <languageTerm type="code" authority="iso639-2b">por</languageTerm>
+            </language>
+        </xsl:if>
+        <xsl:if test=". = 'Printed in Lao Tham (Northern Thai) script'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Northern Thai</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">tai</languageTerm>
+                <scriptTerm type="text" authority="iso15924">Tai Tham (Lanna)</scriptTerm>
+                <scriptTerm type="code" authority="iso15924">lana</scriptTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Shan'">
+        <xsl:if test=". = 'Shan'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Shan</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">shn</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Tagalog'">
+        <xsl:if test=". = 'Tagalog'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Tagalog</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">tgl</languageTerm>
             </language>
         </xsl:if>
-        <xsl:if test="string(text()) = 'Khmer'">
+        <xsl:if test=". = 'Tetum'">
+            <language>
+                <languageTerm type="text" authority="iso639-2b">Tetum</languageTerm>
+                <languageTerm type="code" authority="iso639-2b">tet</languageTerm>
+            </language>
+        </xsl:if>
+        <xsl:if test=". = 'Khmer'">
             <language>
                 <languageTerm type="text" authority="iso639-2b">Khmer</languageTerm>
                 <languageTerm type="code" authority="iso639-2b">khm</languageTerm>
@@ -898,29 +1086,16 @@
     </xsl:template>
     <xsl:template match="dc:relation">
         <relatedItem>
-            <xsl:choose>
-                <xsl:when test="starts-with(text(), 'http://')">
-                    <location>
-                        <url>
-                            <xsl:value-of select="."/>
-                        </url>
-                    </location>
-                    <identifer type="uri">
-                        <xsl:apply-templates/>
-                    </identifer>
-                </xsl:when>
-                <xsl:otherwise>
-                    <titleInfo>
-                        <title>
-                            <xsl:apply-templates/>
-                        </title>
-                    </titleInfo>
-                </xsl:otherwise>
-            </xsl:choose>
+            <location>
+                <url>
+                    <xsl:text>http://sea.lib.niu.edu/islandora/object/</xsl:text>
+                    <xsl:value-of select="."/>
+                </url>
+            </location>
         </relatedItem>
     </xsl:template>
     <xsl:template match="dc:coverage">
-        <xsl:if test=".='Burma'">
+        <xsl:if test="(.='Burma') or (.='Myanmar/Burma')">
             <subject authority="lcsh">
                 <geographic>Burma</geographic>
             </subject>
@@ -1030,6 +1205,9 @@
                 <geographicCode>cn</geographicCode>
             </subject>
         </xsl:if>
+        <xsl:if test="'North America--------'">
+            <xsl:apply-templates select="*[. != 'North America--------']"/>
+        </xsl:if>
         <xsl:if test=".='Indonesia'">
             <subject authority="lcsh">
                 <geographic>Indonesia</geographic>
@@ -1118,7 +1296,7 @@
         </xsl:if>
     </xsl:template>
     <xsl:template match="dc:rights">
-        <accessCondition>
+        <accessCondition type="use and reproduction">
             <xsl:apply-templates/>
         </accessCondition>
     </xsl:template>
