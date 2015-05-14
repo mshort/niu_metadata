@@ -5,7 +5,7 @@ from lxml import etree
 from datetime import datetime
 from eulfedora.server import Repository
 
-HOST = 'http://polaris-dev.lib.niu.edu:8080'
+HOST = 'xxxx'
 fedoraUser = 'xxxx'
 fedoraPass = 'xxxx'
 passwordManager = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -18,7 +18,7 @@ def main(argv):
 
     pids = []
     repo = Repository(root='%s/fedora/' % HOST, username='%s' % fedoraUser, password='%s' % fedoraPass)
-    results = repo.risearch.sparql_query('select ?pid where {?pid <fedora-rels-ext:isMemberOfCollection> <info:fedora/dimenovels:pluckluck>}')
+    results = repo.risearch.sparql_query('select ?pid where {?pid <fedora-rels-ext:isMemberOfCollection> <info:fedora/dimenovels:newnick1903>}')
     for row in results:
         for k, v in row.items():
             pids.append(v.replace('info:fedora/', ''))
@@ -51,7 +51,7 @@ def main(argv):
 
             if test.match(current_date):
             
-                find = etree.XPath("/mods:mods/mods:note[re:match(text(), '[0-9]{4}\W{1}--.+\.$')]", namespaces={'re':regexpNS, 'mods':modsNS})
+                find = etree.XPath("/mods:mods/mods:note[re:match(text(), '[0-9]{4}\.?\W{1}--.+\.$')]", namespaces={'re':regexpNS, 'mods':modsNS})
 
                 try:
                     date_note = find(root)[0].text
@@ -59,9 +59,19 @@ def main(argv):
                     print "Extracted date note: %s" % date_note
                     
                     ## Transform date note into W3CDT
+
                     d = date_note.split('--')[0]
-                    date_object = datetime.strptime(d, '"%B %d, %Y"')
-                    date = date_object.strftime("%Y-%m-%d")
+
+                    ## Notes occasionally end with (.) when transcribed
+                    if d.endswith('."'):
+                        date_object = datetime.strptime(d, '"%B %d, %Y."')
+                        
+                    else:
+                        date_object = datetime.strptime(d, '"%B %d, %Y"')
+
+                    date = str(date_object).split(' ')[0]
+
+                    ##date = date_object.strftime("%Y-%m-%d")   ## datetime.strftime can't handle dates earlier than 1900, so we'll take our changes with splitting the string
 
                     print "Transformed date: %s" % date
 
