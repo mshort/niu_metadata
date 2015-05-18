@@ -1,4 +1,4 @@
 data_conversion
 ===============
 
-Stylesheets for transforming MODS and DC in NIU's Fedora repository.
+Scripts and stylesheets for transforming MODS and DC in NIU's Fedora repository.
