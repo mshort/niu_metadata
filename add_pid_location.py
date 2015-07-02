@@ -38,7 +38,7 @@ def main(argv):
         </xsl:copy>
     </xsl:template>
     <xsl:template match="mods:url">
-        <mods:url access="object in context" usage="primary display">http://dimenovels.lib.niu.edu/islandora/object/dimenovels:%s</mods:url>
+        <mods:url access="object in context" usage="primary display">http://dimenovels.lib.niu.edu/islandora/object/%s</mods:url>
     </xsl:template>
 
     <xsl:strip-space elements="*"/>
