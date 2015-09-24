@@ -1,6 +1,6 @@
 #NIU Metadata Creation and Remediation
 
-This repository contains scripts, stylesheets, and ingest forms developed by Technical Services at NIU to make metadata creation and remediation easier in Islandora. The NIU Data Dictionary, our metadata quality control workflow, and project specifications are also included.
+This repository contains scripts, stylesheets, and ingest forms developed by Technical Services at NIU to make metadata creation and remediation easier in Islandora and DSpace. The NIU Data Dictionary, our metadata quality control workflow, and project specifications are also included.
 
 add_edition_uri.py was written specifically for the dime novel collection. It will read edition URIs from a CSV, retrieve data about the issues from Solr, and add edition URIs to the RELS-EXT of matching objects.
 
