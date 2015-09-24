@@ -1,4 +1,4 @@
-#NIU Metadata Creation and Conversion Scripts
+#NIU Metadata Creation and Remediation
 
 This repository contains scripts and stylesheets developed by Technical Services at NIU to make metadata creation and remediation easier in Fedora. Canonical versions of the NIU Data Dictionary, as well as project specifications, are also included.
 
