@@ -1,0 +1,75 @@
+<mods:mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3" version="3.5" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">    
+    <mods:titleInfo>
+        <mods:title>{{cells["Title"].value.escape("xml")}}</mods:title>
+    </mods:titleInfo>
+    <mods:name type="corporate" authority="naf" authorityURI="http://id.loc.gov/authorities/names" valueURI="{{cells["Issuing Body URI"].value.escape("xml")}}">
+        <mods:namePart>{{cells["Issuing Body"].value.escape("xml")}}</mods:namePart>
+        <mods:role>
+            <mods:roleTerm type="text">issuing body</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+    <mods:name type="personal" authority="naf" authorityURI="http://id.loc.gov/authorities/names" valueURI="{{cells["Artist URI"].value.escape("xml")}}">
+        <mods:namePart>{{cells["Artist"].value.escape("xml")}}</mods:namePart>
+        <mods:role>
+            <mods:roleTerm type="text">artist</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+    <mods:name type="corporate" authority="naf" authorityURI="http://id.loc.gov/authorities/names" valueURI="{{cells["Publisher URI"].value.escape("xml")}}">
+        <mods:namePart>{{cells["Publisher (Recorded)"].value.escape("xml")}}</mods:namePart>
+        <mods:role>
+            <mods:roleTerm type="text">publisher</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+    <mods:typeOfResource>still image</mods:typeOfResource>
+    <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat" valueURI="http://vocab.getty.edu/aat/300027221">posters</mods:genre>
+    <mods:originInfo eventType="publication">
+        <mods:place>
+            <mods:placeTerm type="code" authority="marccountry">{{cells["Place (code)"].value.escape("xml")}}</mods:placeTerm>
+            <mods:placeTerm type="text">{{cells["Place (text)"].value.escape("xml")}}</mods:placeTerm>
+        </mods:place>
+        <mods:publisher>{{cells["Publisher (Transcribed)"].value.escape("xml")}}</mods:publisher>
+        <mods:dateIssued keyDate="yes" encoding="w3cdtf" qualifier="approximate" point="start">1917</mods:dateIssued>
+        <mods:dateIssued encoding="w3cdtf" qualifier="approximate" point="end">1918</mods:dateIssued>
+    </mods:originInfo>
+    <mods:language>
+        <mods:languageTerm authority="iso639-2b" type="code">eng</mods:languageTerm>
+        <mods:languageTerm authority="iso639-2b" type="text">English</mods:languageTerm>
+    </mods:language>
+    <mods:physicalDescription>
+        <mods:form type="content" authority="rdacontent">still image</mods:form>
+        <mods:form type="media" authority="rdamedia">unmediated</mods:form>
+        <mods:form type="carrier" authority="rdacarrier">sheet</mods:form>
+        <mods:internetMediaType>image/tiff</mods:internetMediaType>
+        <mods:internetMediaType>image/jp2</mods:internetMediaType>
+        <mods:internetMediaType>image/jpeg</mods:internetMediaType>
+        <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+        <mods:extent>{{cells["Size"].value.escape("xml").replace("X","x")}} cm</mods:extent>
+    </mods:physicalDescription>
+    <mods:note type="statement of responsibility">{{cells["Statement of Responsibility"].value.escape("xml")}}</mods:note>
+    <mods:note type="caption">{{cells["Caption"].value.escape("xml")}}</mods:note>
+    <mods:subject authority="fast">
+        <mods:topic>{{cells["FAST subjects (650 ONLY)"].value.escape("xml")}}</mods:topic>
+    </mods:subject>
+    <mods:relatedItem type="host">
+        <mods:titleInfo>
+            <mods:title>World War I and II Posters</mods:title>
+        </mods:titleInfo>
+        <mods:location>
+            <mods:url>http://rhc.lib.niu.edu/islandora/object/rhcrc:posters</mods:url>
+        </mods:location>
+    </mods:relatedItem>
+    <mods:location>
+        <mods:physicalLocation authority="oclcorg">JNA</mods:physicalLocation>
+        <mods:physicalLocation xlink:href="http://archon.lib.niu.edu/?p=collections/findingaid&amp;id=200&amp;q=&amp;rootcontentid=25048#id25048">World War I and II Posters. Regional History Center and University Archives, Northern Illinois University.</mods:physicalLocation>
+        <mods:shelfLocator>Oversize Drawer 4-9</mods:shelfLocator>
+    </mods:location>
+    <mods:accessCondition type="useAndReproduction">Property rights in the collection belong to the Regional History Center; literary rights are dedicated to the public. Print reproductions and high-resolution scans can be obtained for a small fee. For more information about rights and reproductions, visit http://rhc.lib.niu.edu/rights </mods:accessCondition>
+    <mods:recordInfo>
+        <mods:descriptionStandard>dacs</mods:descriptionStandard>
+        <mods:recordContentSource authority="marcorg">JNA</mods:recordContentSource>
+        <mods:recordOrigin>Converted from CSV to MODS using Open Refine.</mods:recordOrigin>
+        <mods:languageOfCataloging>
+            <mods:languageTerm authority="iso639-2b" type="code">eng</mods:languageTerm>
+        </mods:languageOfCataloging>
+    </mods:recordInfo>
+</mods:mods>
