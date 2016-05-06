@@ -47,10 +47,10 @@
     </mods:physicalDescription>{{if(isBlank(cells["Artist"].value),"","
     <mods:note type=\"statement of responsibility\">"+cells["Statement of Responsibility"].value.escape("xml")+"</mods:note>")}}
     <mods:note type="caption">{{cells["Caption"].value.escape("xml")}}</mods:note>{{if(isBlank(cells["Notes"].value),"","
-    <mods:note>"+cells["Notes"].value.escape("xml")+"</mods:note>")}}{{if(isBlank(cells["FAST subjects (650 ONLY)"].value),"","
+        <mods:note>"+cells["Notes"].value.escape("xml")+"</mods:note>")}}{{if(isBlank(cells["FAST subjects (650 ONLY)"].value),"",forEach(split(cells["FAST subjects (650 ONLY)"].value,"||"), v, "
     <mods:subject authority=\"fast\">
-        <mods:topic>"+cells["FAST subjects (650 ONLY)"].value.escape("xml")+"</mods:topic>
-    </mods:subject>")}}
+        <mods:topic>"+v.escape("xml")+"</mods:topic>
+    </mods:subject>"))}}
     <mods:relatedItem type="host">
         <mods:titleInfo>
             <mods:title>World War I and II Posters</mods:title>
