@@ -7,27 +7,27 @@
         <mods:role>
             <mods:roleTerm type="text">issuing body</mods:roleTerm>
         </mods:role>
-    </mods:name>
-    <mods:name type="personal" authority="naf" authorityURI="http://id.loc.gov/authorities/names" valueURI="{{cells["Artist URI"].value.escape("xml")}}">
-        <mods:namePart>{{cells["Artist"].value.escape("xml")}}</mods:namePart>
+    </mods:name>{{if(isBlank(cells["Artist"].value),"","
+    <mods:name type=\"personal\" authority=\"naf\" authorityURI=\"http://id.loc.gov/authorities/names\" valueURI=\""+cells["Artist URI"].value.escape("xml")+"\">
+        <mods:namePart>"+cells["Artist"].value.escape("xml")+"</mods:namePart>
         <mods:role>
-            <mods:roleTerm type="text">artist</mods:roleTerm>
+            <mods:roleTerm type=\"text\">artist</mods:roleTerm>
         </mods:role>
-    </mods:name>
-    <mods:name type="corporate" authority="naf" authorityURI="http://id.loc.gov/authorities/names" valueURI="{{cells["Publisher URI"].value.escape("xml")}}">
-        <mods:namePart>{{cells["Publisher (Recorded)"].value.escape("xml")}}</mods:namePart>
+    </mods:name>")}}{{if(isBlank(cells["Publisher (Recorded)"].value),"","
+    <mods:name type=\"corporate\" authority=\"naf\" authorityURI=\"http://id.loc.gov/authorities/names\" valueURI=\""+cells["Publisher URI"].value.escape("xml")+"\">
+        <mods:namePart>"+cells["Publisher (Recorded)"].value.escape("xml")+"</mods:namePart>
         <mods:role>
-            <mods:roleTerm type="text">publisher</mods:roleTerm>
+            <mods:roleTerm type=\"text\">publisher</mods:roleTerm>
         </mods:role>
-    </mods:name>
+    </mods:name>")}}
     <mods:typeOfResource>still image</mods:typeOfResource>
     <mods:genre authority="aat" authorityURI="http://vocab.getty.edu/aat" valueURI="http://vocab.getty.edu/aat/300027221">posters</mods:genre>
-    <mods:originInfo eventType="publication">
+    <mods:originInfo eventType="publication">{{if(isBlank(cells["Place (text)"].value),"","
         <mods:place>
-            <mods:placeTerm type="code" authority="marccountry">{{cells["Place (code)"].value.escape("xml")}}</mods:placeTerm>
-            <mods:placeTerm type="text">{{cells["Place (text)"].value.escape("xml")}}</mods:placeTerm>
-        </mods:place>
-        <mods:publisher>{{cells["Publisher (Transcribed)"].value.escape("xml")}}</mods:publisher>
+            <mods:placeTerm type=\"code\" authority=\"marccountry\">"+cells["Place (code)"].value.escape("xml")+"</mods:placeTerm>
+            <mods:placeTerm type=\"text\">"+cells["Place (text)"].value.escape("xml")+"</mods:placeTerm>
+        </mods:place>")}}{{if(isBlank(cells["Publisher (Transcribed)"].value),"","
+        <mods:publisher>"+cells["Publisher (Transcribed)"].value.escape("xml")+"</mods:publisher>")}}
         <mods:dateIssued keyDate="yes" encoding="w3cdtf" qualifier="approximate" point="start">1917</mods:dateIssued>
         <mods:dateIssued encoding="w3cdtf" qualifier="approximate" point="end">1918</mods:dateIssued>
     </mods:originInfo>
@@ -44,12 +44,13 @@
         <mods:internetMediaType>image/jpeg</mods:internetMediaType>
         <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
         <mods:extent>{{cells["Size"].value.escape("xml").replace("X","x")}} cm</mods:extent>
-    </mods:physicalDescription>
-    <mods:note type="statement of responsibility">{{cells["Statement of Responsibility"].value.escape("xml")}}</mods:note>
-    <mods:note type="caption">{{cells["Caption"].value.escape("xml")}}</mods:note>
-    <mods:subject authority="fast">
-        <mods:topic>{{cells["FAST subjects (650 ONLY)"].value.escape("xml")}}</mods:topic>
-    </mods:subject>
+    </mods:physicalDescription>{{if(isBlank(cells["Artist"].value),"","
+    <mods:note type=\"statement of responsibility\">"+cells["Statement of Responsibility"].value.escape("xml")+"</mods:note>")}}
+    <mods:note type="caption">{{cells["Caption"].value.escape("xml")}}</mods:note>{{if(isBlank(cells["Notes"].value),"","
+    <mods:note>"+cells["Notes"].value.escape("xml")+"</mods:note>")}}{{if(isBlank(cells["FAST subjects (650 ONLY)"].value),"","
+    <mods:subject authority=\"fast\">
+        <mods:topic>"+cells["FAST subjects (650 ONLY)"].value.escape("xml")+"</mods:topic>
+    </mods:subject>")}}
     <mods:relatedItem type="host">
         <mods:titleInfo>
             <mods:title>World War I and II Posters</mods:title>
@@ -58,6 +59,7 @@
             <mods:url>http://rhc.lib.niu.edu/islandora/object/rhcrc:posters</mods:url>
         </mods:location>
     </mods:relatedItem>
+    <mods:identifier type="local">WW-{{cells["Number"].value}}</mods:identifier>
     <mods:location>
         <mods:physicalLocation authority="oclcorg">JNA</mods:physicalLocation>
         <mods:physicalLocation xlink:href="http://archon.lib.niu.edu/?p=collections/findingaid&amp;id=200&amp;q=&amp;rootcontentid=25048#id25048">World War I and II Posters. Regional History Center and University Archives, Northern Illinois University.</mods:physicalLocation>
@@ -67,7 +69,7 @@
     <mods:recordInfo>
         <mods:descriptionStandard>dacs</mods:descriptionStandard>
         <mods:recordContentSource authority="marcorg">JNA</mods:recordContentSource>
-        <mods:recordOrigin>Converted from CSV to MODS using Open Refine.</mods:recordOrigin>
+        <mods:recordOrigin>Converted from CSV to MODS using Open Refine templating.</mods:recordOrigin>
         <mods:languageOfCataloging>
             <mods:languageTerm authority="iso639-2b" type="code">eng</mods:languageTerm>
         </mods:languageOfCataloging>
