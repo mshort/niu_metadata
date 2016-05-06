@@ -51,6 +51,10 @@
     <mods:subject authority=\"fast\">
         <mods:topic>"+v.escape("xml")+"</mods:topic>
     </mods:subject>"))}}
+        <mods:subject authority="lcsh" authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh2010119465">
+        <mods:topic authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh85148236">World War, 1914-1918</mods:topic>
+        <mods:genre authorityURI="http://id.loc.gov/authorities/subjects" valueURI="http://id.loc.gov/authorities/subjects/sh99001723">Posters</mods:genre>
+    </mods:subject>
     <mods:relatedItem type="host">
         <mods:titleInfo>
             <mods:title>World War I and II Posters</mods:title>
