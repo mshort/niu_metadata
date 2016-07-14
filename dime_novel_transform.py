@@ -16,7 +16,7 @@ def getSubjectUri(subject):
 
     try:
         response = requests.get('http://id.loc.gov/authorities/subjects/label/%s' % subject)
-        link = response.url
+        link = response.headers['X-URI']
         pattern = re.compile(r'(.+)\.html$')
         value = pattern.findall(link)[0].encode('utf-8')
         return ('http://id.loc.gov/authorities/subjects', value)   
@@ -24,7 +24,7 @@ def getSubjectUri(subject):
         try:
 
             response = requests.get('http://id.loc.gov/authorities/names/label/%s' % subject)
-            link = response.url
+            link = response.headers['X-URI']
             pattern = re.compile(r'(.+)\.html$')
             value = pattern.findall(link)[0].encode('utf-8')
             return ('http://id.loc.gov/authorities/names', value)        
@@ -36,7 +36,7 @@ def getNameUri(subject):
     try:
 
         response = requests.get('http://id.loc.gov/authorities/names/label/%s' % subject)
-        link = response.url
+        link = response.headers['X-URI']
         pattern = re.compile(r'(.+)\.html$')
         value = pattern.findall(link)[0].encode('utf-8')
         return ('http://id.loc.gov/authorities/names', value)        
